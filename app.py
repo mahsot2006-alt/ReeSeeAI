@@ -41,7 +41,7 @@ html, body, [class*="css"] {
   --muted: #a1a1aa;
   --border: #2e2645;
   --input: #31274f;
-  --radius: 12px;
+  --radius: 10px;
 }
 
 /* === ОСНОВНОЙ ФОН === */
