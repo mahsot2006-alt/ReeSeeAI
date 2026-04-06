@@ -21,7 +21,7 @@ SECTIONS = {
 }
 
 # ─── CSS ────────────────────────────────────────────────────────
-CUSTOM_CSS = """ . . . """
+CUSTOM_CSS = """
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -41,7 +41,7 @@ html, body, [class*="css"] {
   --muted: #a1a1aa;
   --border: #2e2645;
   --input: #31274f;
-  --radius: 10px;
+  --radius: 12px;
 }
 
 /* === ОСНОВНОЙ ФОН === */
