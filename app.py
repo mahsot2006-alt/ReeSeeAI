@@ -21,53 +21,52 @@ SECTIONS = {
 }
 
 # ─── CSS ────────────────────────────────────────────────────────
-CUSTOM_CSS = """
+CUSTOM_CSS = """ . . . """
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+
+/* === ШРИФТ === */
+html, body, [class*="css"] {
+    font-family: "JetBrains Mono", monospace !important;
+}
+
+/* === ЦВЕТА (OKLCH-подобная тема) === */
 :root {
   --background: #0f0b1a;
   --foreground: #f4f4f5;
   --card: #18122b;
-  --card-foreground: #f4f4f5;
   --primary: #d946ef;
-  --primary-foreground: #ffffff;
   --secondary: #27203f;
-  --muted: #27203f;
-  --muted-foreground: #a1a1aa;
+  --muted: #a1a1aa;
   --border: #2e2645;
   --input: #31274f;
-  --ring: #c026d3;
   --radius: 12px;
 }
 
-/* Общий фон */
+/* === ОСНОВНОЙ ФОН === */
 html, body, [data-testid="stAppViewContainer"] {
     background: radial-gradient(circle at 20% 20%, #1a1333, #0f0b1a 60%) !important;
     color: var(--foreground);
 }
 
-/* Сайдбар */
+/* === САЙДБАР === */
 [data-testid="stSidebar"] {
     background: var(--card) !important;
     border-right: 1px solid var(--border) !important;
 }
 
-/* Заголовки */
-h1, h2, h3 {
-    color: var(--foreground);
-    font-weight: 600;
+/* === ТЕКСТ === */
+h1, h2, h3, p, span {
+    color: var(--foreground) !important;
 }
 
-/* Карточки */
-.stMarkdown, .stExpander {
-    background: transparent;
-}
-
-/* Кнопки */
+/* === КНОПКИ === */
 .stButton > button {
     background: var(--primary) !important;
-    color: var(--primary-foreground) !important;
-    border: none !important;
+    color: white !important;
     border-radius: var(--radius) !important;
+    border: none !important;
     font-weight: 600 !important;
     transition: all 0.2s ease;
 }
@@ -78,21 +77,16 @@ h1, h2, h3 {
     box-shadow: 0 6px 20px rgba(217, 70, 239, 0.3);
 }
 
-/* Инпуты */
+/* === ИНПУТЫ === */
 .stTextInput input,
 .stTextArea textarea {
     background: var(--input) !important;
     border: 1px solid var(--border) !important;
-    color: var(--foreground) !important;
+    color: white !important;
     border-radius: var(--radius) !important;
-    padding: 10px !important;
 }
 
-.stTextInput input::placeholder {
-    color: var(--muted-foreground);
-}
-
-/* Чат */
+/* === ЧАТ === */
 .chat-wrap {
     background: var(--card);
     border: 1px solid var(--border);
@@ -102,7 +96,6 @@ h1, h2, h3 {
     overflow-y: auto;
 }
 
-/* Сообщения */
 .chat-bubble-user {
     background: var(--primary);
     color: white;
@@ -120,19 +113,14 @@ h1, h2, h3 {
     margin: 8px 60px 8px 0;
 }
 
-/* Разделители */
-hr {
-    border-color: var(--border);
-}
-
-/* Expander */
+/* === КАРТОЧКИ / EXPANDER === */
 [data-testid="stExpander"] {
     background: var(--secondary);
     border-radius: var(--radius);
     border: 1px solid var(--border);
 }
 
-/* Скролл */
+/* === СКРОЛЛ === */
 ::-webkit-scrollbar {
     width: 6px;
 }
@@ -140,6 +128,7 @@ hr {
     background: #3b2f63;
     border-radius: 10px;
 }
+
 </style>
 """
 
