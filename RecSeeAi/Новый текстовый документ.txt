@@ -1,3 +1,0 @@
-streamlit run C:\Users\нурик\Desktop\RecSeeAi\app.py --server.runOnSave True
-"TMDB_API_KEY", "237a14ba3d35dc8e9a31103ab9eb449f")
-"GROQ_API_KEY", "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")
