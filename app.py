@@ -23,67 +23,123 @@ SECTIONS = {
 # ─── CSS ────────────────────────────────────────────────────────
 CUSTOM_CSS = """
 <style>
-    html, body, [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #1a0033 0%, #2d1047 50%, #1a0033 100%) !important;
-        color: #ffffff;
-    }
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #2d1047 0%, #1a0033 100%) !important;
-        border-right: 2px solid #6b4c9a !important;
-    }
-    h1, h2, h3, p { color: #ffffff; }
-    .stButton > button {
-        background: #9d69d5 !important;
-        border: 2px solid #c59dff !important;
-        color: #ffffff !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease;
-    }
-    .stButton > button:hover {
-        background: #c59dff !important;
-        box-shadow: 0 4px 12px rgba(157, 105, 213, 0.4) !important;
-    }
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea {
-        background: #3d2563 !important;
-        border: 2px solid #6b4c9a !important;
-        color: #ffffff !important;
-        border-radius: 10px !important;
-        padding: 10px !important;
-    }
-    .stTextInput > div > div > input::placeholder,
-    .stTextArea > div > div > textarea::placeholder {
-        color: #9d69d5 !important;
-    }
-    hr { border-color: #6b4c9a !important; }
-    .chat-bubble-user {
-        background: #6b4c9a;
-        border-radius: 14px 14px 4px 14px;
-        padding: 12px 16px;
-        margin: 8px 0 8px 60px;
-        color: #fff;
-        word-wrap: break-word;
-    }
-    .chat-bubble-ai {
-        background: #3d2563;
-        border: 1px solid #6b4c9a;
-        border-radius: 14px 14px 14px 4px;
-        padding: 12px 16px;
-        margin: 8px 60px 8px 0;
-        color: #d4b8f0;
-        word-wrap: break-word;
-        white-space: pre-wrap;
-    }
-    .chat-wrap {
-        background: rgba(30,20,50,0.6);
-        border: 2px solid #6b4c9a;
-        border-radius: 16px;
-        padding: 16px;
-        max-height: 480px;
-        overflow-y: auto;
-        margin-bottom: 12px;
-    }
+:root {
+  --background: #0f0b1a;
+  --foreground: #f4f4f5;
+  --card: #18122b;
+  --card-foreground: #f4f4f5;
+  --primary: #d946ef;
+  --primary-foreground: #ffffff;
+  --secondary: #27203f;
+  --muted: #27203f;
+  --muted-foreground: #a1a1aa;
+  --border: #2e2645;
+  --input: #31274f;
+  --ring: #c026d3;
+  --radius: 12px;
+}
+
+/* Общий фон */
+html, body, [data-testid="stAppViewContainer"] {
+    background: radial-gradient(circle at 20% 20%, #1a1333, #0f0b1a 60%) !important;
+    color: var(--foreground);
+}
+
+/* Сайдбар */
+[data-testid="stSidebar"] {
+    background: var(--card) !important;
+    border-right: 1px solid var(--border) !important;
+}
+
+/* Заголовки */
+h1, h2, h3 {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+/* Карточки */
+.stMarkdown, .stExpander {
+    background: transparent;
+}
+
+/* Кнопки */
+.stButton > button {
+    background: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    border: none !important;
+    border-radius: var(--radius) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease;
+}
+
+.stButton > button:hover {
+    background: #c026d3 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(217, 70, 239, 0.3);
+}
+
+/* Инпуты */
+.stTextInput input,
+.stTextArea textarea {
+    background: var(--input) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--foreground) !important;
+    border-radius: var(--radius) !important;
+    padding: 10px !important;
+}
+
+.stTextInput input::placeholder {
+    color: var(--muted-foreground);
+}
+
+/* Чат */
+.chat-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+/* Сообщения */
+.chat-bubble-user {
+    background: var(--primary);
+    color: white;
+    border-radius: 14px 14px 4px 14px;
+    padding: 10px 14px;
+    margin: 8px 0 8px 60px;
+}
+
+.chat-bubble-ai {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    border-radius: 14px 14px 14px 4px;
+    padding: 10px 14px;
+    margin: 8px 60px 8px 0;
+}
+
+/* Разделители */
+hr {
+    border-color: var(--border);
+}
+
+/* Expander */
+[data-testid="stExpander"] {
+    background: var(--secondary);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+/* Скролл */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-thumb {
+    background: #3b2f63;
+    border-radius: 10px;
+}
 </style>
 """
 
