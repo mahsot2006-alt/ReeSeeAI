@@ -2,6 +2,7 @@ import os
 import requests
 import streamlit as st
 import json
+import uuid
 from datetime import datetime
 from groq import Groq
 
@@ -10,7 +11,6 @@ TMDB_KEY = os.getenv("TMDB_API_KEY", "237a14ba3d35dc8e9a31103ab9eb449f")
 GROQ_KEY = os.getenv("GROQ_API_KEY", "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")
 TMDB_BASE = "https://api.themoviedb.org/3"
 POSTER_BASE = "https://image.tmdb.org/t/p/w500"
-STORAGE_FILE = "user_collection.json"
 
 client = Groq(api_key=GROQ_KEY)
 
@@ -106,15 +106,26 @@ def get_model() -> str:
     except:
         return "llama-3.3-70b-versatile"
 
-# ─── ХРАНИЛИЩЕ ──────────────────────────────────────────────────
+# ─── ХРАНИЛИЩЕ С ПЕРСОНАЛЬНЫМ USER ID ────────────────────────────
+def get_user_id() -> str:
+    if "user_id" not in st.session_state:
+        st.session_state.user_id = str(uuid.uuid4())[:8]
+    return st.session_state.user_id
+
 def read_collection() -> dict:
-    if os.path.exists(STORAGE_FILE):
-        with open(STORAGE_FILE, "r", encoding="utf-8") as f:
+    user_id = get_user_id()
+    storage_file = f"collection_{user_id}.json"
+    
+    if os.path.exists(storage_file):
+        with open(storage_file, "r", encoding="utf-8") as f:
             return json.load(f)
     return {key: [] for key in SECTIONS}
 
 def write_collection() -> None:
-    with open(STORAGE_FILE, "w", encoding="utf-8") as f:
+    user_id = get_user_id()
+    storage_file = f"collection_{user_id}.json"
+    
+    with open(storage_file, "w", encoding="utf-8") as f:
         json.dump(st.session_state.collection, f, ensure_ascii=False, indent=2)
 
 # ─── TMDB ───────────────────────────────────────────────────────
