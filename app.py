@@ -417,7 +417,7 @@ def trigger_search():
 def page_home() -> None:
     st.markdown("""
     <div style="background:rgba(61,37,99,0.3);border:2px solid #6b4c9a;border-radius:16px;padding:20px;margin-bottom:24px;">
-        <h3 style="margin:0 0 8px;">🎬 Кинотека</h3>
+        <h3 style="margin:0 0 8px;">🎬 ReeSeeAI</h3>
         <p style="margin:0;color:#b8a5d1;">Найди фильм по описанию или получи персональные рекомендации от ИИ</p>
     </div>
     """, unsafe_allow_html=True)
