@@ -7,8 +7,13 @@ from datetime import datetime
 from groq import Groq
 
 # ─── КОНФИГУРАЦИЯ ───────────────────────────────────────────────
-TMDB_KEY = os.getenv("TMDB_API_KEY", "3816b3fd3a626e79fb26075744b751f1")
-GROQ_KEY = os.getenv("GROQ_API_KEY", "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")
+TMDB_KEY = os.getenv("TMDB_API_KEY", "237a14ba3d35dc8e9a31103ab9eb449f")
+GROQ_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_KEY:
+    st.error("❌ Не задан GROQ_API_KEY. Добавь его в переменные окружения / Secrets.")
+    st.stop()
+
 TMDB_BASE = "https://api.themoviedb.org/3"
 POSTER_BASE = "https://image.tmdb.org/t/p/w500"
 
@@ -135,6 +140,11 @@ h1, h2, h3, p, span {
 # ─── МОДЕЛЬ GROQ ────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
 def get_model() -> str:
+    """
+    ИСПРАВЛЕНО: старые модели (llama-3.3-70b-versatile, llama-3.1-70b-versatile,
+    llama-3.1-8b-instant, mixtral-8x7b-32768) деприкейчены Groq (decommission
+    16.08.2026). Используем актуальные рекомендованные замены.
+    """
     try:
         models = client.models.list()
         preferred = [
@@ -147,7 +157,7 @@ def get_model() -> str:
             if m in available:
                 return m
         return available[0] if available else "openai/gpt-oss-120b"
-    except:
+    except Exception:
         return "openai/gpt-oss-120b"
 
 # ─── ХРАНИЛИЩЕ С ПЕРСОНАЛЬНЫМ USER ID ────────────────────────────
@@ -159,7 +169,7 @@ def get_user_id() -> str:
 def read_collection() -> dict:
     user_id = get_user_id()
     storage_file = f"collection_{user_id}.json"
-    
+
     if os.path.exists(storage_file):
         with open(storage_file, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -168,7 +178,7 @@ def read_collection() -> dict:
 def write_collection() -> None:
     user_id = get_user_id()
     storage_file = f"collection_{user_id}.json"
-    
+
     with open(storage_file, "w", encoding="utf-8") as f:
         json.dump(st.session_state.collection, f, ensure_ascii=False, indent=2)
 
@@ -179,7 +189,7 @@ def tmdb_request(endpoint: str, **params) -> dict:
         r = requests.get(f"{TMDB_BASE}/{endpoint}", params=params, timeout=8)
         r.raise_for_status()
         return r.json()
-    except:
+    except Exception:
         return {}
 
 @st.cache_data(ttl=600)
@@ -270,21 +280,28 @@ def chat_with_ai(user_message: str, history: list, mode: str) -> str:
         return f"❌ Ошибка Groq: {e}"
 
 def extract_titles_and_search(ai_text: str) -> list:
+    """
+    ИИ извлекает названия + английские переводы, ищем в TMDB.
+    ИСПРАВЛЕНО: промпт теперь явно запрещает копировать таблицы/вопросы,
+    добавлен few-shot пример формата и более строгая фильтрация строк-мусора.
+    """
     try:
         model = get_model()
-        prompt = f"""Из текста ниже извлеки НАЗВАНИЯ фильмов/сериалов, которые там упомянуты.
+        prompt = f"""Из текста ниже извлеки НАЗВАНИЯ фильмов и сериалов, которые там упомянуты.
 
-СТРОГО игнорируй любые таблицы, годы, описания, вопросы "что дальше" — 
-верни ТОЛЬКО список названий в формате ниже, без markdown, без заголовков, без нумерации.
+СТРОГО игнорируй: заголовки таблиц, годы выпуска, описания сюжета, уточняющие вопросы
+("Что дальше?", "Предпочитаешь фильмы или сериалы?" и т.п.) — они НЕ являются названиями.
 
+Верни ТОЛЬКО список названий, без markdown-разметки, без нумерации, без пояснений.
 Формат — ровно одна строка на тайтл:
 РУССКОЕ НАЗВАНИЕ | АНГЛИЙСКОЕ НАЗВАНИЕ
 
-Если английское неизвестно — пиши только русское, без символа |.
+Если английское название неизвестно — пиши только русское, без символа |.
 
 Пример правильного ответа:
 Викинги | Vikings
 Тёмный кристалл: Возрождение | The Dark Crystal: Age of Resistance
+Книга Илая | The Book of Eli
 
 Текст:
 {ai_text}"""
@@ -302,16 +319,20 @@ def extract_titles_and_search(ai_text: str) -> list:
 
         for line in raw.split("\n"):
             line = line.strip().lstrip("•-–—*#").strip()
-            # чистим кавычки-«ёлочки» и лишние пробелы
             line = line.strip("«»\"'")
-            if not line or len(line) < 2 or "|" not in line and len(line.split()) > 6:
-                continue  # похоже на описание/вопрос, а не название — пропускаем
+
+            if not line or len(line) < 2:
+                continue
+
+            # отсекаем явный мусор: длинные предложения-описания и вопросы
+            if "|" not in line and (len(line.split()) > 6 or line.endswith("?")):
+                continue
 
             if "|" in line:
                 parts = line.split("|")
                 ru_title = parts[0].strip().strip("«»\"'")
-                en_title = parts[1].strip().strip("«»\"'()")
-                search_queries = [en_title, ru_title]
+                en_title = parts[1].strip().strip("«»\"'()") if len(parts) > 1 else ""
+                search_queries = [q for q in (en_title, ru_title) if q]
             else:
                 search_queries = [line]
 
@@ -439,9 +460,15 @@ def show_ai_chat(mode: str) -> None:
     )
 
     st.divider()
-        if st.button("🎬 Найти рекомендованные фильмы", use_container_width=True, key=f"find_{mode}"):
+
+    if st.button("🎬 Найти рекомендованные фильмы", use_container_width=True, key=f"find_{mode}"):
         if len(history) > 1:
-            last_ai_reply = next((m["content"] for m in reversed(history) if m["role"] == "ai"), "")
+            # ИСПРАВЛЕНО: берём только последний ответ ИИ, а не весь диалог целиком —
+            # иначе модель извлечения путается в старых таблицах/вопросах и не находит тайтлы.
+            last_ai_reply = next(
+                (m["content"] for m in reversed(history) if m["role"] == "ai"),
+                "",
+            )
             with st.spinner("🔍 Подбираю фильмы по последнему ответу…"):
                 movies = extract_titles_and_search(last_ai_reply)
             if movies:
@@ -451,6 +478,10 @@ def show_ai_chat(mode: str) -> None:
                 st.warning("Не нашёл конкретных фильмов — уточни запрос в чате.")
         else:
             st.info("Сначала пообщайся с ИИ — расскажи что хочешь посмотреть.")
+
+    if st.button("🗑 Очистить чат", use_container_width=True, key=f"clear_{mode}"):
+        st.session_state[hist_key] = [{"role": "ai", "content": first_msg}]
+        st.rerun()
 
 # ─── СТРАНИЦЫ ───────────────────────────────────────────────────
 
