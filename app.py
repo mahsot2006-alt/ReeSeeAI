@@ -8,7 +8,7 @@ from groq import Groq
 
 # ─── КОНФИГУРАЦИЯ ───────────────────────────────────────────────
 TMDB_KEY = os.getenv("TMDB_API_KEY", "237a14ba3d35dc8e9a31103ab9eb449f")
-GROQ_KEY = os.getenv("GROQ_API_KEY", "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")
+GROQ_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_KEY:
     st.error("❌ Не задан GROQ_API_KEY. Добавь его в переменные окружения / Secrets.")
@@ -187,9 +187,15 @@ def tmdb_request(endpoint: str, **params) -> dict:
     params.update({"api_key": TMDB_KEY, "language": "ru-RU"})
     try:
         r = requests.get(f"{TMDB_BASE}/{endpoint}", params=params, timeout=8)
-        r.raise_for_status()
+        if r.status_code != 200:
+            # ИСПРАВЛЕНО: раньше любая ошибка (401/429/timeout) молча превращалась
+            # в {} → "Ничего не найдено", без единой подсказки на причину.
+            st.session_state["tmdb_last_error"] = f"TMDB {r.status_code}: {r.text[:300]}"
+            return {}
+        st.session_state["tmdb_last_error"] = None
         return r.json()
-    except Exception:
+    except requests.exceptions.RequestException as e:
+        st.session_state["tmdb_last_error"] = f"Сетевая ошибка TMDB: {e}"
         return {}
 
 @st.cache_data(ttl=600)
@@ -397,6 +403,9 @@ def render_movie_card(movie: dict, col, content_type: str = "movie") -> None:
 def render_grid(movies: list, content_type: str = "movie") -> None:
     if not movies:
         st.info("Ничего не найдено.")
+        tmdb_err = st.session_state.get("tmdb_last_error")
+        if tmdb_err:
+            st.error(f"⚠️ Диагностика TMDB: {tmdb_err}")
         return
     st.caption(f"Найдено: {len(movies)}")
     cols = st.columns(4)
