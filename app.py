@@ -8,7 +8,7 @@ from groq import Groq
 
 # ─── КОНФИГУРАЦИЯ ───────────────────────────────────────────────
 TMDB_KEY = os.getenv("TMDB_API_KEY", "237a14ba3d35dc8e9a31103ab9eb449f")
-GROQ_KEY = os.getenv("GROQ_API_KEY")
+GROQ_KEY = os.getenv("GROQ_API_KEY", "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")
 
 if not GROQ_KEY:
     st.error("❌ Не задан GROQ_API_KEY. Добавь его в переменные окружения / Secrets.")
