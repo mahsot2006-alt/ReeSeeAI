@@ -138,18 +138,17 @@ def get_model() -> str:
     try:
         models = client.models.list()
         preferred = [
-            "llama-3.3-70b-versatile",
-            "llama-3.1-70b-versatile",
-            "llama-3.1-8b-instant",
-            "mixtral-8x7b-32768",
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "qwen/qwen3.6-27b",
         ]
         available = [m.id for m in models.data]
         for m in preferred:
             if m in available:
                 return m
-        return available[0] if available else "llama-3.3-70b-versatile"
+        return available[0] if available else "openai/gpt-oss-120b"
     except:
-        return "llama-3.3-70b-versatile"
+        return "openai/gpt-oss-120b"
 
 # ─── ХРАНИЛИЩЕ С ПЕРСОНАЛЬНЫМ USER ID ────────────────────────────
 def get_user_id() -> str:
