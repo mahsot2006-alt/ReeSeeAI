@@ -8,7 +8,7 @@ from groq import Groq
 
 # ─── КОНФИГУРАЦИЯ ───────────────────────────────────────────────
 TMDB_KEY = os.getenv("TMDB_API_KEY", "237a14ba3d35dc8e9a31103ab9eb449f")
-GROQ_KEY = os.getenv("GROQ_API_KEY", "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")
+GROQ_KEY = os.getenv("GROQ_API_KEY", "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")
 TMDB_BASE = "https://api.themoviedb.org/3"
 POSTER_BASE = "https://image.tmdb.org/t/p/w500"
 
