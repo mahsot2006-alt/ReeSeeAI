@@ -439,11 +439,11 @@ def show_ai_chat(mode: str) -> None:
     )
 
     st.divider()
-    if st.button("🎬 Найти рекомендованные фильмы", use_container_width=True, key=f"find_{mode}"):
+        if st.button("🎬 Найти рекомендованные фильмы", use_container_width=True, key=f"find_{mode}"):
         if len(history) > 1:
-            full_context = "\n".join(m["content"] for m in history)
-            with st.spinner("🔍 Подбираю фильмы по всему диалогу…"):
-                movies = extract_titles_and_search(full_context)
+            last_ai_reply = next((m["content"] for m in reversed(history) if m["role"] == "ai"), "")
+            with st.spinner("🔍 Подбираю фильмы по последнему ответу…"):
+                movies = extract_titles_and_search(last_ai_reply)
             if movies:
                 st.subheader("🎬 Рекомендованные фильмы")
                 render_grid(movies)
@@ -451,13 +451,6 @@ def show_ai_chat(mode: str) -> None:
                 st.warning("Не нашёл конкретных фильмов — уточни запрос в чате.")
         else:
             st.info("Сначала пообщайся с ИИ — расскажи что хочешь посмотреть.")
-
-    if st.button("🎬 Найти рекомендованные фильмы", use_container_width=True, key=f"find_{mode}"):
-    if len(history) > 1:
-        last_ai_reply = next((m["content"] for m in reversed(history) if m["role"] == "ai"), "")
-        with st.spinner("🔍 Подбираю фильмы по последнему ответу…"):
-            movies = extract_titles_and_search(last_ai_reply)
-        
 
 # ─── СТРАНИЦЫ ───────────────────────────────────────────────────
 
