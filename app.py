@@ -270,15 +270,21 @@ def chat_with_ai(user_message: str, history: list, mode: str) -> str:
         return f"❌ Ошибка Groq: {e}"
 
 def extract_titles_and_search(ai_text: str) -> list:
-    """ИИ извлекает названия + английские переводы, ищем в TMDB."""
     try:
         model = get_model()
-        prompt = f"""Из текста ниже извлеки названия фильмов и сериалов.
-Для каждого названия дай ОРИГИНАЛЬНОЕ (английское) название если знаешь.
-Формат ответа — строго одна строка на фильм:
+        prompt = f"""Из текста ниже извлеки НАЗВАНИЯ фильмов/сериалов, которые там упомянуты.
+
+СТРОГО игнорируй любые таблицы, годы, описания, вопросы "что дальше" — 
+верни ТОЛЬКО список названий в формате ниже, без markdown, без заголовков, без нумерации.
+
+Формат — ровно одна строка на тайтл:
 РУССКОЕ НАЗВАНИЕ | АНГЛИЙСКОЕ НАЗВАНИЕ
 
-Если английское неизвестно, пиши только русское без символа |
+Если английское неизвестно — пиши только русское, без символа |.
+
+Пример правильного ответа:
+Викинги | Vikings
+Тёмный кристалл: Возрождение | The Dark Crystal: Age of Resistance
 
 Текст:
 {ai_text}"""
@@ -296,13 +302,15 @@ def extract_titles_and_search(ai_text: str) -> list:
 
         for line in raw.split("\n"):
             line = line.strip().lstrip("•-–—*#").strip()
-            if not line or len(line) < 2:
-                continue
+            # чистим кавычки-«ёлочки» и лишние пробелы
+            line = line.strip("«»\"'")
+            if not line or len(line) < 2 or "|" not in line and len(line.split()) > 6:
+                continue  # похоже на описание/вопрос, а не название — пропускаем
 
             if "|" in line:
                 parts = line.split("|")
-                ru_title = parts[0].strip()
-                en_title = parts[1].strip()
+                ru_title = parts[0].strip().strip("«»\"'")
+                en_title = parts[1].strip().strip("«»\"'()")
                 search_queries = [en_title, ru_title]
             else:
                 search_queries = [line]
@@ -444,9 +452,12 @@ def show_ai_chat(mode: str) -> None:
         else:
             st.info("Сначала пообщайся с ИИ — расскажи что хочешь посмотреть.")
 
-    if st.button("🗑 Очистить чат", use_container_width=True, key=f"clear_{mode}"):
-        st.session_state[hist_key] = [{"role": "ai", "content": first_msg}]
-        st.rerun()
+    if st.button("🎬 Найти рекомендованные фильмы", use_container_width=True, key=f"find_{mode}"):
+    if len(history) > 1:
+        last_ai_reply = next((m["content"] for m in reversed(history) if m["role"] == "ai"), "")
+        with st.spinner("🔍 Подбираю фильмы по последнему ответу…"):
+            movies = extract_titles_and_search(last_ai_reply)
+        
 
 # ─── СТРАНИЦЫ ───────────────────────────────────────────────────
 
